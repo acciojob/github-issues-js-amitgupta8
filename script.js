@@ -1,33 +1,37 @@
-//your code here
-$(document).ready(function(){
-			var pageNumber = 1;
+ const issuesList = document.getElementById('issues-list');
+    const pageNum = document.getElementById('page-num');
+    let currentPage = 1;
 
-			function loadIssues(pageNumber){
-				$.ajax({
-					url: `https://api.github.com/repositories/1296269/issues?page=${pageNumber}&per_page=5`,
-					method: 'GET',
-					success: function(response){
-						$('#issues_list').empty(); //clear the list before adding new issues
-						$.each(response, function(index, issue){
-							var issueName = issue.title;
-							$('#issues_list').append(`<li>${issueName}</li>`);
-						});
-						$('h1').text(`Page number ${pageNumber}`);
-					}
-				});
-			}
+    function displayIssues(issues) {
+      issuesList.innerHTML = '';
+      issues.forEach(issue => {
+        const li = document.createElement('li');
+        li.textContent = issue.title;
+        issuesList.appendChild(li);
+      });
+    }
 
-			loadIssues(pageNumber); //load the issues for page 1 by default
+    function fetchIssues(page) {
+      const url = `https://api.github.com/repositories/1296269/issues?page=${page}&per_page=5`;
 
-			$('#load_prev').click(function(){
-				if(pageNumber > 1){ //don't go back if on page 1
-					pageNumber--;
-					loadIssues(pageNumber);
-				}
-			});
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          displayIssues(data);
+          pageNum.textContent = page;
+          currentPage = page;
+        })
+        .catch(error => console.error(error));
+    }
 
-			$('#load_next').click(function(){
-				pageNumber++;
-				loadIssues(pageNumber);
-			});
-		});
+    document.getElementById('load-next').addEventListener('click', () => {
+      fetchIssues(currentPage + 1);
+    });
+
+    document.getElementById('load-prev').addEventListener('click', () => {
+      if (currentPage > 1) {
+        fetchIssues(currentPage - 1);
+      }
+    });
+
+    fetchIssues(currentPage);
