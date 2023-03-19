@@ -1,37 +1,36 @@
- const issuesList = document.getElementById('issues-list');
-    const pageNum = document.getElementById('page-num');
-    let currentPage = 1;
+const issuesList = document.getElementById("issuesList");
+const pageNumberSpan = document.getElementById("pageNumber");
+let pageNumber = 1;
 
-    function displayIssues(issues) {
-      issuesList.innerHTML = '';
-      issues.forEach(issue => {
-        const li = document.createElement('li');
-        li.textContent = issue.title;
-        issuesList.appendChild(li);
-      });
-    }
+function displayIssues(issues) {
+  issuesList.innerHTML = "";
+  issues.forEach((issue) => {
+    const issueName = issue.title;
+    const issueItem = document.createElement("li");
+    issueItem.innerText = issueName;
+    issuesList.appendChild(issueItem);
+  });
+}
 
-    function fetchIssues(page) {
-      const url = `https://api.github.com/repositories/1296269/issues?page=${page}&per_page=5`;
+function loadIssues() {
+  fetch(`https://api.github.com/repositories/1296269/issues?page=${pageNumber}&per_page=5`)
+    .then((response) => response.json())
+    .then((issues) => displayIssues(issues))
+    .catch((error) => console.error(error));
+}
 
-      fetch(url)
-        .then(response => response.json())
-        .then(data => {
-          displayIssues(data);
-          pageNum.textContent = page;
-          currentPage = page;
-        })
-        .catch(error => console.error(error));
-    }
+loadIssues();
 
-    document.getElementById('load-next').addEventListener('click', () => {
-      fetchIssues(currentPage + 1);
-    });
+document.getElementById("load_next").addEventListener("click", () => {
+  pageNumber++;
+  pageNumberSpan.innerText = pageNumber;
+  loadIssues();
+});
 
-    document.getElementById('load-prev').addEventListener('click', () => {
-      if (currentPage > 1) {
-        fetchIssues(currentPage - 1);
-      }
-    });
-
-    fetchIssues(currentPage);
+document.getElementById("load_prev").addEventListener("click", () => {
+  if (pageNumber > 1) {
+    pageNumber--;
+    pageNumberSpan.innerText = pageNumber;
+    loadIssues();
+  }
+});
